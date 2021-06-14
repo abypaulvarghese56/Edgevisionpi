@@ -33,7 +33,9 @@ class mainStreamClass:
     
     def startMain(self):
 
-        
+        #set  queue size
+        self.cam_queue = mp.Queue(maxsize=10)
+
         #get all cams
         
 

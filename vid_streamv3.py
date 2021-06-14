@@ -52,15 +52,20 @@ class StreamCapture(mp.Process):
         self.zmqSocket = None
         self.zmqpublishurl = zmqpuburl
         self.stop = stop
-        
+        self.outQueue = outQueue
         self.framerate = framerate
         self.currentState = StreamMode.INIT_STREAM
         self.pipeline = None
         self.source = None
+        self.decode = None
+        self.convert = None
         self.sink = None
         self.image_arr = None
         self.newImage = False
-        
+        self.frame1 = None
+        self.frame2 = None
+        self.num_unexpected_tot = 40
+        self.unexpected_cnt = 0
         self.cameraName= cameraName
 
 
