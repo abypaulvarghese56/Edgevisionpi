@@ -10,6 +10,8 @@ Gst.init(None)
 import time
 import cv2
 import zmq
+import imagezmq
+import json
 from viztracer import log_sparse
 
 '''Konwn issues
@@ -75,8 +77,6 @@ class StreamCapture(mp.Process):
         caps = sample.get_caps()
 
         
-        #logger.info("New sample recveived from %s Format is %s Height:%d, width:%d", self.cameraName,format,height,width)
-
         arr = np.ndarray(
             (caps.get_structure(0).get_value('height'),
              caps.get_structure(0).get_value('width'),
@@ -102,7 +102,11 @@ class StreamCapture(mp.Process):
         height=caps.get_structure(0).get_value('height')
         width=caps.get_structure(0).get_value('width')
         logger.info("Got sample from %s as %s Height:%d, width:%d . capture time: %s", self.cameraName,imgformat,height,width,str(currentTime))
-        self.zmqSocket.send_pyobj(dict(frame=arr, cam_name=self.cameraName, captureTime=currentTime))
+
+        data = {"cam_name": self.cameraName, "captureTime":currentTime }
+               
+        self.zmqSocket.send_image(data,arr)
+
         return Gst.FlowReturn.OK
 
     
@@ -149,9 +153,9 @@ class StreamCapture(mp.Process):
         # Wait until error or EOS
         bus = self.pipeline.get_bus()
         
-        self.zmqcontext = zmq.Context()
-        self.zmqSocket = self.zmqcontext.socket(zmq.PUB)
-        self.zmqSocket.bind(self.zmqpublishurl)
+        
+        self.zmqSocket = imagezmq.ImageSender(connect_to=self.zmqpublishurl, REQ_REP=False)
+
 
         while True:
 
