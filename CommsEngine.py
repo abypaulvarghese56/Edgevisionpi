@@ -29,8 +29,6 @@ bas_dir = "./data/"
 def process_data():
    image_hub = imagezmq.ImageHub(open_port='tcp://127.0.0.1:5557', REQ_REP=False)
 
-   with context.socket(zmq.PULL) as src:
-      src.bind("tcp://127.0.0.1:5557")
 
    while True:
       
@@ -38,7 +36,7 @@ def process_data():
 
       
       cam_name = data['cam_name']
-      eventid = data['eventid']
+      eventid = data['captureTime']
 
          
       ctimestr=datetime.now().isoformat(sep=' ', timespec='milliseconds')

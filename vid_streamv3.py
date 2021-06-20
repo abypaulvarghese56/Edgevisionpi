@@ -97,6 +97,9 @@ class StreamCapture(mp.Process):
         #url="Samples/" + self.cameraName + "_" + str(time.time()) +".jpg"
         #cv2.imwrite(url,arr)
         currentTime=time.time()
+        url="Samples/" + self.cameraName + "_" + str(currentTime) +".jpg"
+        #cv2.imwrite(url,arr)
+        
         caps = sample.get_caps()
         imgformat=caps.get_structure(0).get_value('format')
         height=caps.get_structure(0).get_value('height')
@@ -106,6 +109,8 @@ class StreamCapture(mp.Process):
         data = {"cam_name": self.cameraName, "captureTime":currentTime }
                
         self.zmqSocket.send_image(data,arr)
+        
+        arr = []
 
         return Gst.FlowReturn.OK
 
@@ -115,6 +120,7 @@ class StreamCapture(mp.Process):
         
         
         self.pipeline = Gst.parse_launch(pipelinestring)
+        # source params
         self.source = self.pipeline.get_by_name('m_rtspsrc')
         
         
@@ -188,7 +194,7 @@ class StreamCapture(mp.Process):
                         print("Pipeline state changed from %s to %s." %
                               (old_state.value_nick, new_state.value_nick))
                 else:
-                    print("Unexpected message received.")
+                    print("Unexpected message received.%d",message.type)
                     self.unexpected_cnt = self.unexpected_cnt + 1
                     #if self.unexpected_cnt == self.num_unexpected_tot:
                         #break

@@ -17,7 +17,8 @@ import datetime
 from viztracer import log_sparse
 import json
 import imagezmq
-
+import numpy
+import base64
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(process)d - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -34,12 +35,14 @@ image_hub = imagezmq.ImageHub(open_port='tcp://127.0.0.1:6001', REQ_REP=False)
 image_hub = imagezmq.ImageHub(open_port='tcp://127.0.0.1:6002', REQ_REP=False)
 image_hub = imagezmq.ImageHub(open_port='tcp://127.0.0.1:6003', REQ_REP=False)
 
+image_hub.connect('tcp://127.0.0.1:6001')
+image_hub.connect('tcp://127.0.0.1:6002')
+image_hub.connect('tcp://127.0.0.1:6003')
 
 time.sleep(1)
-logger.info('CONNECT complete')
 
 dest_queue=imagezmq.ImageSender(connect_to='tcp://0.0.0.0:5557', REQ_REP=False)
-
+logger.info('CONNECT complete')
 
 data = None
 frame = None
@@ -65,6 +68,13 @@ try:
 
                 logger.info('Processing - camera name: %s capture time: %s totalimagesprocessed :%d', cam_name, captureTime,totalprocessedImages)
 
+                
+                eventid =1
+                file_name = "{0}{1}-{2}-{3}.{4}".format(bas_dir,cam_name,eventid,time.strftime("%Y%m%d-%H%M%S"),"jpg")
+
+                #cv2.imwrite(file_name, frame)
+                
+                
                 frame = detect_people(frame)
 
                 if frame is not None:
