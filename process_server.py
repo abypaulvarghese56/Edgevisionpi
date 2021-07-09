@@ -24,16 +24,14 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(process)d - %(n
 logger = logging.getLogger(__name__)
 
 logger.info('Initializing Processing...')
-
+dictLastCameraTrigger = {}
+dictCameraProcessingDelay = {}
 context = zmq.Context()
 
 logger.info('connecting to all sockets')
 
 
 image_hub = imagezmq.ImageHub(open_port='tcp://127.0.0.1:6000', REQ_REP=False)
-image_hub = imagezmq.ImageHub(open_port='tcp://127.0.0.1:6001', REQ_REP=False)
-image_hub = imagezmq.ImageHub(open_port='tcp://127.0.0.1:6002', REQ_REP=False)
-image_hub = imagezmq.ImageHub(open_port='tcp://127.0.0.1:6003', REQ_REP=False)
 
 image_hub.connect('tcp://127.0.0.1:6001')
 image_hub.connect('tcp://127.0.0.1:6002')
@@ -59,13 +57,25 @@ try:
                 if cv2.waitKey(1) == ord("q"):
                     break
                 
-                payload, frame = image_hub.recv_image()
-                cam_name = payload['cam_name']
-                captureTime = payload['captureTime']
                 
+                data, frame = image_hub.recv_image()
+                                
+                cam_name = data['cam_name']
+                captureTime = data['captureTime']
+                
+                dictLastCameraTrigger[cam_name] = captureTime
+                
+                currenttime = time.time()
+                executiondelay  = currenttime - (dictLastCameraTrigger.get(cam_name, currenttime) ) 
+                lastMaxDelay = dictCameraProcessingDelay.get(cam_name,1)
+                logger.info("execution delay:%.4f maxdelay : %.4f",executiondelay,lastMaxDelay)
+                if(executiondelay > lastMaxDelay  ):
+
+                        dictCameraProcessingDelay[cam_name]= executiondelay
                 
                 totalprocessedImages+=1
 
+                
                 logger.info('Processing - camera name: %s capture time: %s totalimagesprocessed :%d', cam_name, captureTime,totalprocessedImages)
 
                 
@@ -103,6 +113,7 @@ except (KeyboardInterrupt, SystemExit):
         timeduration = processingEndTime - startimeofImageProcessing
         
         logger.info('Total images processed :%d Duration :%s',totalprocessedImages,timeduration)
+        print(dictCameraProcessingDelay)
         logger.info('System exiting...')
         pass
 

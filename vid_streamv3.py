@@ -69,6 +69,8 @@ class StreamCapture(mp.Process):
         self.num_unexpected_tot = 40
         self.unexpected_cnt = 0
         self.cameraName= cameraName
+        self.last_sample_received_time = time.time()
+        self.highest_sample_delay = 1 #initalize according to the frame rate
 
 
     
@@ -97,6 +99,11 @@ class StreamCapture(mp.Process):
         #url="Samples/" + self.cameraName + "_" + str(time.time()) +".jpg"
         #cv2.imwrite(url,arr)
         currentTime=time.time()
+        sample_delay = currentTime - self.last_sample_received_time 
+        logger.info("Current sample delay of %s : %.4f",self.cameraName, sample_delay)
+        if(sample_delay > self.highest_sample_delay):
+                self.highest_sample_delay = sample_delay
+        self.last_sample_received_time  = currentTime
         url="Samples/" + self.cameraName + "_" + str(currentTime) +".jpg"
         #cv2.imwrite(url,arr)
         
@@ -201,5 +208,7 @@ class StreamCapture(mp.Process):
 
 
         print('terminating cam pipe')
+        logger.info("Highest sampling delay : %.4f",self.highest_sample_delay)
+        
         self.stop.set()
         self.pipeline.set_state(Gst.State.NULL)
