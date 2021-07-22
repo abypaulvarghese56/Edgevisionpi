@@ -5,4 +5,3 @@ https://www.linkedin.com/pulse/video-analytics-edge-using-raspberry-pi-4-intel-n
 
 
 
-
