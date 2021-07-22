@@ -3,3 +3,5 @@ Capture RTSP streams from 4 different IP cameras in Raspberry PI 4 and perform a
 #Setup and code explanation can be found here:
 https://www.linkedin.com/pulse/video-analytics-edge-using-raspberry-pi-4-intel-ncs-aby-paul-varghese/
 
+
+
